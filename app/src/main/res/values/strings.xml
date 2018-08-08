@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Quiz Whiz</string>
+    <string name="facebook_app_id">301246267121830</string>
+    <string name="fb_login_protocol_scheme">fb301246267121830</string>
+</resources>
