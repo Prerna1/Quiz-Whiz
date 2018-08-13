@@ -1,9 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".LoginActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/root_layout">
 
-</android.support.constraint.ConstraintLayout>
+        <ImageView
+            android:id="@+id/quizwhiz"
+            android:layout_width="310dp"
+            android:layout_height="150dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="68dp"
+            android:src="@drawable/quizwhiz_logo" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to"
+        android:textStyle="bold"
+        android:textSize="50sp"
+        android:layout_marginTop="15dp"
+        android:layout_below="@+id/quizwhiz"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tv1"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quiz Whiz"
+        android:textStyle="bold"
+        android:textSize="50sp"
+        android:layout_below="@+id/tv1"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tv2"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thanks for installing-let's get you set up!"
+        android:textSize="15sp"
+        android:layout_below="@+id/tv2"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tv3"/>
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tv3"
+        android:layout_marginTop="15dp"/>
+
+    </RelativeLayout>
+</ScrollView>
