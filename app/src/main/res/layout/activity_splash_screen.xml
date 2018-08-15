@@ -6,13 +6,12 @@
     tools:context=".SplashScreenActivity">
 
     <TextView
+        android:id="@+id/tv_quiz_whiz"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text = "Quiz Whiz"
-        android:textSize="50sp"
         android:layout_centerInParent="true"
-        android:textStyle="bold"
-        android:id="@+id/tv_quiz_whiz"
-        />
+        android:text="Quiz Whiz"
+        android:textSize="50sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

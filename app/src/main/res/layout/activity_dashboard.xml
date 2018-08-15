@@ -5,45 +5,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".DashboardActivity">
+
     <ImageView
         android:id="@+id/profilepic"
         android:layout_width="130dp"
         android:layout_height="130dp"
-        android:layout_marginTop="150dp"
-        android:layout_marginLeft="30dp"/>
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="150dp" />
+
     <TextView
         android:id="@+id/user_name"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="20dp"
         android:layout_marginTop="150dp"
         android:layout_toRightOf="@id/profilepic"
-        android:layout_marginLeft="10dp"
-        android:textSize="30sp"
         android:text="Kashish"
-        android:layout_marginRight="20dp"
-        android:textAlignment="center"/>
+        android:textAlignment="center"
+        android:textSize="30sp" />
+
     <TextView
         android:id="@+id/matches_won"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/user_name"
-        android:layout_toRightOf="@id/profilepic"
-        android:layout_marginRight="20dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginRight="20dp"
         android:layout_marginTop="10dp"
-        android:textAlignment="center"
-        android:text="Won : "/>
+        android:layout_toRightOf="@id/profilepic"
+        android:text="Won : "
+        android:textAlignment="center" />
+
     <TextView
         android:id="@+id/matches_draw"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/matches_won"
-        android:layout_toRightOf="@id/profilepic"
-        android:layout_marginRight="20dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginRight="20dp"
         android:layout_marginTop="10dp"
-        android:textAlignment="center"
-        android:text="Drawn : "/>
+        android:layout_toRightOf="@id/profilepic"
+        android:text="Drawn : "
+        android:textAlignment="center" />
 
     <TextView
         android:id="@+id/matches_lost"
@@ -59,29 +63,31 @@
         android:id="@+id/challenge_button"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_below="@+id/leaderboard"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="75dp"
-        android:text="CHALLENGE"
         android:background="@color/com_facebook_button_background_color"
-        android:textColor="@color/com_facebook_button_text_color"/>
+        android:text="CHALLENGE"
+        android:textColor="@color/com_facebook_button_text_color" />
+
     <Button
+        android:id="@+id/leaderboard"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_below="@+id/profilepic"
-        android:id="@+id/leaderboard"
-        android:text="LEADERBOARD"
-        android:layout_marginTop="50dp" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:text="LEADERBOARD" />
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:titleTextColor="#ffffff"
         android:background="@color/com_facebook_button_background_color"
         android:theme="@style/MainMenu"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:title="MY DASHBOARD" />
+        app:title="MY DASHBOARD"
+        app:titleTextColor="#ffffff" />
 
 
 </RelativeLayout>

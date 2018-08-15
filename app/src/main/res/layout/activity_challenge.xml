@@ -3,12 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.gk.dev.quizwhiz.SelectTopicActivity">
+    tools:context="com.gk.dev.quizwhiz.ChallengeActivity">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/topics_recycler_view"
+        android:id="@+id/friends_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="5dp"
         android:scrollbars="vertical" />

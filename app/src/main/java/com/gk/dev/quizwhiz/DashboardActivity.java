@@ -1,8 +1,9 @@
 package com.gk.dev.quizwhiz;
+
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,10 +14,9 @@ import android.widget.TextView;
 
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
-import com.gk.dev.quizwhiz.Model.ChallengerInformation;
-import com.gk.dev.quizwhiz.Model.MatchStatistics;
+import com.gk.dev.quizwhiz.Model.ChallengeDetails;
+import com.gk.dev.quizwhiz.Model.UserDetails;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,42 +25,68 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 public class DashboardActivity extends AppCompatActivity {
-    ValueEventListener l1;
-    private FirebaseAuth mAuth;
-    private String fbid;
-    private DatabaseReference databaseReference,challenged, userStatus;
-    TextView matchesWon ,matchesLost , matchesDraw,userName;
-    private Button challengeButton;
-    MatchStatistics matchStatistics;
-    ChallengerInformation challengerInformation;
-    private int won , lost , draw;
+    ValueEventListener challengeListener;
+    TextView matchesWon, matchesLost, matchesDraw, userName;
+    UserDetails userDetails;
+    ChallengeDetails challengerInformation;
+    FirebaseAuth mAuth;
+    String fbId;
+    DatabaseReference challenges, userStatus;
+    int won, lost, draw;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         mAuth = FirebaseAuth.getInstance();
-        matchesWon =findViewById(R.id.matches_won);
-        matchesDraw = findViewById(R.id.matches_draw);
-        matchesLost= findViewById(R.id.matches_lost);
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-        Profile profile = Profile.getCurrentProfile();
-        fbid = profile.getId();
-        userStatus = databaseReference.child("Users/"+fbid+"/status");
-        userStatus.onDisconnect().setValue("0");
-        userStatus.setValue("1");
-        Picasso.with(getApplicationContext()).load(Profile.getCurrentProfile().getProfilePictureUri(200,200)).into((ImageView)findViewById(R.id.profilepic));
-        databaseReference.child("Users/"+fbid+"/picture").setValue(Profile.getCurrentProfile().getProfilePictureUri(200,200).toString());
-        userName = findViewById(R.id.user_name);
-        userName.setText(Profile.getCurrentProfile().getFirstName());
-        databaseReference.child("Users/"+fbid+"/name").setValue(Profile.getCurrentProfile().getFirstName());
 
-        challengeButton =findViewById(R.id.challenge_button);
+        userName = findViewById(R.id.user_name);
+        matchesWon = findViewById(R.id.matches_won);
+        matchesDraw = findViewById(R.id.matches_draw);
+        matchesLost = findViewById(R.id.matches_lost);
+        Button challengeButton = findViewById(R.id.challenge_button);
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        Profile profile = Profile.getCurrentProfile();
+        fbId = profile.getId();
+
+        userStatus = databaseReference.child("UserDetails/" + fbId + "/status");
+        userStatus.onDisconnect().setValue(0);
+        userStatus.setValue(1);
+
+        Picasso.with(getApplicationContext()).load(profile.getProfilePictureUri(200, 200)).into((ImageView) findViewById(R.id.profilepic));
+        userName.setText(profile.getFirstName());
+        DatabaseReference stats = databaseReference.child("UserDetails/" + fbId);
+        stats.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                userDetails = dataSnapshot.getValue(UserDetails.class);
+                assert userDetails != null;
+                won = userDetails.won;
+                lost = userDetails.lost;
+                draw = userDetails.draw;
+
+                String wonText = "Won: " + Integer.toString(won);
+                String drawText = "Draw: " + Integer.toString(draw);
+                String lostText = "Lost: " + Integer.toString(lost);
+
+                matchesWon.setText(wonText);
+                matchesDraw.setText(drawText);
+                matchesLost.setText(lostText);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         challengeButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        startActivity(new Intent(DashboardActivity.this,SelectTopicActivity.class));
+                        startActivity(new Intent(DashboardActivity.this, SelectTopicActivity.class));
                     }
                 }
         );
@@ -79,12 +105,11 @@ public class DashboardActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logout1:
-
-                userStatus.setValue("0");
+                userStatus.setValue(0);
                 mAuth.signOut();
                 LoginManager.getInstance().logOut();
                 finish();
-                startActivity(new Intent(DashboardActivity.this,RedirectActivity.class));
+                startActivity(new Intent(DashboardActivity.this, RedirectActivity.class));
                 return true;
 
             default:
@@ -95,99 +120,42 @@ public class DashboardActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser!=null) {
-            userStatus.setValue("0");
-        }
         super.onPause();
+        userStatus.setValue(0);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        userStatus.onDisconnect().setValue("0");
-        userStatus.setValue("1");
-        DatabaseReference stats =databaseReference.child("Users/"+fbid);;
-        stats.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                matchStatistics = new MatchStatistics();
-                matchStatistics = dataSnapshot.getValue(MatchStatistics.class);
-                Log.d("prerna",matchStatistics.toString());
-                if(matchStatistics==null){
-                    won=lost=draw=0;
-                }
-                else{
-                    won=matchStatistics.won;
-                    lost=matchStatistics.lost;
-                    draw=matchStatistics.draw;
-                }
-                matchesWon.setText("Won: "+Integer.toString(won));
-                matchesDraw.setText("Draw: "+Integer.toString(draw));
-                matchesLost.setText("Lost: "+Integer.toString(lost));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        userStatus.setValue(1);
     }
 
     @Override
     protected void onStart() {
-        userStatus.onDisconnect().setValue("0");
-        userStatus.setValue("1");
         super.onStart();
 
-        challenged = FirebaseDatabase.getInstance().getReference().child("challenges").child(fbid);
-        l1=new ValueEventListener() {
+        challenges = FirebaseDatabase.getInstance().getReference().child("Challenges").child(fbId);
+        challengeListener = new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                challengerInformation = dataSnapshot.getValue(ChallengerInformation.class);
-                if(challengerInformation!=null) {
-                    String pic = challengerInformation.picture;
-                    if(pic!=null) {
-                        if (pic.equals("0")) {
-
-                        } else {
-                            if(challengerInformation.fid!=null){
-//                                DatabaseReference previous = FirebaseDatabase.getInstance().getReference().child("acceptreject").child(k.fid);
-//                                previous.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                    @Override
-//                                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                                        if(challengerInformation.status!=null){
-//                                            if((challengerInformation.status).equals("0")){
-                                           startActivity(new Intent(DashboardActivity.this, AcceptRejectActivity.class));
-//
-//                                            }
-//                                        }
-//
-//                                    }
-//
-//                                    @Override
-//                                    public void onCancelled(DatabaseError databaseError) {
-//
-//                                    }
-//                                });
-                            }
-                        }
-                    }
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
+                if (challengerInformation != null) {
+                    startActivity(new Intent(DashboardActivity.this, AcceptRejectActivity.class));
                 }
 
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         };
-        challenged.addValueEventListener(l1);
+        challenges.addValueEventListener(challengeListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        challenged.removeEventListener(l1);
+        challenges.removeEventListener(challengeListener);
     }
 }

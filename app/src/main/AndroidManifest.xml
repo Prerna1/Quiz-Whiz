@@ -41,7 +41,9 @@
         <activity android:name=".RedirectActivity" />
         <activity android:name=".DashboardActivity" />
         <activity android:name=".SelectTopicActivity" />
-        <activity android:name=".AcceptRejectActivity"></activity>
+        <activity android:name=".AcceptRejectActivity" />
+        <activity android:name=".ChallengeActivity" />
+        <activity android:name=".WaitForResponseActivity"></activity>
     </application>
 
 </manifest>
