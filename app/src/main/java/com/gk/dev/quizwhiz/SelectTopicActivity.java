@@ -11,6 +11,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.facebook.Profile;
 import com.gk.dev.quizwhiz.Model.ChallengeDetails;
@@ -37,6 +39,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
     TopicAdapter mAdapter;
     RecyclerView recyclerView;
     boolean topicsRetrieved;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView = findViewById(R.id.topics_recycler_view);
+        progressBar = findViewById(R.id.pb_select_topic);
         recyclerView.setLayoutManager(mLayoutManager);
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -71,6 +75,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
                 assert topicsList != null;
                 mAdapter = new TopicAdapter(topicsList, SelectTopicActivity.this);
                 recyclerView.setAdapter(mAdapter);
+                progressBar.setVisibility(View.GONE);
                 topicsRetrieved = true;
             }
 
@@ -163,7 +168,8 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
                 if (challengerInformation != null) {
-                    startActivity(new Intent(SelectTopicActivity.this, AcceptRejectActivity.class));
+                    Intent intent = new Intent(SelectTopicActivity.this, AcceptRejectActivity.class);
+                    intent.putExtra("challengeDetails", challengerInformation);
                 }
 
             }

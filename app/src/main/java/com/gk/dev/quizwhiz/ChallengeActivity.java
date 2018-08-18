@@ -11,6 +11,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -46,8 +48,9 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
     RecyclerView recyclerView;
     ChallengeDetails challengerInformation;
     Profile profile;
-    private SearchView searchView;
-    private ChallengeAdapter mAdapter;
+    SearchView searchView;
+    ChallengeAdapter mAdapter;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,7 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
         setContentView(R.layout.activity_challenge);
 
         selectedTopic = Objects.requireNonNull(getIntent().getExtras()).getString("selectedTopic");
-
+        progressBar = findViewById(R.id.pb_challenge);
 
         friendsRetrieved = false;
 
@@ -65,6 +68,11 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
 
         profile = Profile.getCurrentProfile();
         fbId = profile.getId();
+
+        recyclerView = findViewById(R.id.friends_recycler_view);
+
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(mLayoutManager);
 
         userStatus = databaseReference.child("UserDetails/" + fbId + "/status");
         userStatus.onDisconnect().setValue(0);
@@ -102,12 +110,9 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
                         });
                         friendsRetrieved = true;
 
-                        recyclerView = findViewById(R.id.friends_recycler_view);
-
-                        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                        recyclerView.setLayoutManager(mLayoutManager);
                         mAdapter = new ChallengeAdapter(getApplicationContext(), friends, ChallengeActivity.this);
                         recyclerView.setAdapter(mAdapter);
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
 
@@ -195,7 +200,8 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
                 if (challengerInformation != null) {
-                    startActivity(new Intent(ChallengeActivity.this, AcceptRejectActivity.class));
+                    Intent intent = new Intent(ChallengeActivity.this, AcceptRejectActivity.class);
+                    intent.putExtra("challengeDetails", challengerInformation);
                 }
 
             }

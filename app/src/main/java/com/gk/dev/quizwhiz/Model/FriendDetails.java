@@ -3,8 +3,8 @@ package com.gk.dev.quizwhiz.Model;
 import java.io.Serializable;
 
 public class FriendDetails implements Serializable {
-    String name, pictureURL, fbId;
-    int status;
+    public String name, pictureURL, fbId;
+    public int status;
 
     public FriendDetails() {
 
