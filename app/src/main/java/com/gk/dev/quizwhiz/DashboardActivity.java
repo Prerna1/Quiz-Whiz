@@ -139,9 +139,10 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
-                if (challengerInformation != null) {
+                if (challengerInformation != null && challengerInformation.getName()!="null") {
                     Intent intent = new Intent(DashboardActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
+                    startActivity(intent);
                 }
 
             }

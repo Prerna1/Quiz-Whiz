@@ -87,6 +87,7 @@ public class ChallengeAdapter extends RecyclerView.Adapter<ChallengeAdapter.View
                 UserDetails friendDetails = dataSnapshot.getValue(UserDetails.class);
                 if (holder.getAdapterPosition() >= 0 && friendDetails != null) {
                     String nameNStatus = filteredFriends.get(holder.getAdapterPosition()).getName();
+                    filteredFriends.get(holder.getAdapterPosition()).setStatus(friendDetails.getStatus());
                     if (friendDetails.getStatus() == 0)
                         nameNStatus = nameNStatus.concat(" OFFLINE");
                     else if (friendDetails.getStatus() == 1)

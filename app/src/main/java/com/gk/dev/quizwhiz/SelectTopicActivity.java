@@ -170,6 +170,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
                 if (challengerInformation != null) {
                     Intent intent = new Intent(SelectTopicActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
+                    startActivity(intent);
                 }
 
             }
@@ -191,7 +192,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
     @Override
     public void onListItemClick(String selectedTopic) {
         Intent intent = new Intent(SelectTopicActivity.this, ChallengeActivity.class);
-        intent.putExtra("SelectedTopic", selectedTopic);
+        intent.putExtra("selectedTopic", selectedTopic);
         startActivity(intent);
     }
 }

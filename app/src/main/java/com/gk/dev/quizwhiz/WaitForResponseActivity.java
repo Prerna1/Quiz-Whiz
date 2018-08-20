@@ -33,10 +33,10 @@ public class WaitForResponseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wait_for_response);
 
-        challengeReference = FirebaseDatabase.getInstance().getReference().child("Challenges").child(selectedFriend.getFbId());
-
         selectedTopic = Objects.requireNonNull(getIntent().getExtras()).getString("selectedTopic");
         selectedFriend = (FriendDetails) getIntent().getExtras().get("selectedFriend");
+
+        challengeReference = FirebaseDatabase.getInstance().getReference().child("Challenges").child(selectedFriend.getFbId());
 
         final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
@@ -68,9 +68,13 @@ public class WaitForResponseActivity extends AppCompatActivity {
                 if (challengeDetails == null) {
                     finish();
                 } else if (challengeDetails.getIsAccepted() == 1) {
-                    Intent intent = new Intent(WaitForResponseActivity.this, DashboardActivity.class);
-                    intent.putExtra("selectedFriend", selectedFriend);
-                    intent.putExtra("selectedTopic", selectedTopic);
+                    Intent intent = new Intent(WaitForResponseActivity.this, QuestionActivity.class);
+                    ChallengeDetails challengeDetails1 = new ChallengeDetails();
+                    challengeDetails.setFbId(selectedFriend.getFbId());
+                    challengeDetails.setName(selectedFriend.getName());
+                    challengeDetails.setPicture(selectedFriend.getPictureURL());
+                    challengeDetails.setTopic(selectedTopic);
+                    intent.putExtra("challengeDetails", challengeDetails1);
                     startActivity(intent);
                     finish();
                 }

@@ -202,6 +202,7 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
                 if (challengerInformation != null) {
                     Intent intent = new Intent(ChallengeActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
+                    startActivity(intent);
                 }
 
             }
