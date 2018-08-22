@@ -10,6 +10,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.gk.dev.quizwhiz.Model.TopicName;
 import com.gk.dev.quizwhiz.R;
 
 import java.util.ArrayList;
@@ -17,10 +18,10 @@ import java.util.List;
 
 public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.ViewHolder> implements Filterable {
     final private ListItemClickListener mOnClickListener;
-    private List<String> topicList, filteredTopics;
+    private List<TopicName> topicList, filteredTopics;
 
 
-    public TopicAdapter(List<String> topicList, ListItemClickListener listener) {
+    public TopicAdapter(List<TopicName> topicList, ListItemClickListener listener) {
         this.topicList = topicList;
         filteredTopics = new ArrayList<>();
         filteredTopics.addAll(topicList);
@@ -37,8 +38,8 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.ViewHolder> 
                 if (charString.isEmpty()) {
                     filteredTopics.addAll(topicList);
                 } else {
-                    for (String row : topicList) {
-                        if (row.toLowerCase().contains(charString.toLowerCase())) {
+                    for (TopicName row : topicList) {
+                        if (row.getTopic().toLowerCase().contains(charString.toLowerCase())) {
                             filteredTopics.add(row);
                         }
                     }
@@ -64,7 +65,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String topic = filteredTopics.get(position);
+        String topic = filteredTopics.get(position).getTopic();
         holder.topic.setText(topic);
     }
 
@@ -74,7 +75,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.ViewHolder> 
     }
 
     public interface ListItemClickListener {
-        void onListItemClick(String selectedTopic);
+        void onListItemClick(TopicName selectedTopic);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -90,7 +91,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.ViewHolder> 
 
         @Override
         public void onClick(View view) {
-            String selectedTopic = filteredTopics.get(getAdapterPosition());
+            TopicName selectedTopic = filteredTopics.get(getAdapterPosition());
             mOnClickListener.onListItemClick(selectedTopic);
         }
     }

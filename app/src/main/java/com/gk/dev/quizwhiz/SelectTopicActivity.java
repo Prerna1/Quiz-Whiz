@@ -3,9 +3,9 @@ package com.gk.dev.quizwhiz;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -15,9 +15,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.facebook.Profile;
+import com.gk.dev.quizwhiz.Adapters.TopicAdapter;
 import com.gk.dev.quizwhiz.Model.ChallengeDetails;
 import com.gk.dev.quizwhiz.Model.TopicName;
-import com.gk.dev.quizwhiz.Adapters.TopicAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,7 +32,7 @@ import java.util.Objects;
 public class SelectTopicActivity extends AppCompatActivity implements TopicAdapter.ListItemClickListener {
     ValueEventListener challengeListener;
     ChallengeDetails challengerInformation;
-    List<String> topicsList;
+    List<TopicName> topicsList;
     String fbId;
     DatabaseReference challenges, userStatus;
     SearchView searchView;
@@ -70,7 +70,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot d : dataSnapshot.getChildren()) {
-                    topicsList.add(Objects.requireNonNull(d.getValue(TopicName.class)).getTopic());
+                    topicsList.add(Objects.requireNonNull(d.getValue(TopicName.class)));
                 }
                 assert topicsList != null;
                 mAdapter = new TopicAdapter(topicsList, SelectTopicActivity.this);
@@ -167,7 +167,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
-                if (challengerInformation != null) {
+                if (challengerInformation != null && !challengerInformation.getTopic().equals("null")) {
                     Intent intent = new Intent(SelectTopicActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
                     startActivity(intent);
@@ -190,7 +190,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
     }
 
     @Override
-    public void onListItemClick(String selectedTopic) {
+    public void onListItemClick(TopicName selectedTopic) {
         Intent intent = new Intent(SelectTopicActivity.this, ChallengeActivity.class);
         intent.putExtra("selectedTopic", selectedTopic);
         startActivity(intent);

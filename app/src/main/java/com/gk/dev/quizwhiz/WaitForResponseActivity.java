@@ -10,6 +10,7 @@ import android.widget.Button;
 import com.facebook.Profile;
 import com.gk.dev.quizwhiz.Model.ChallengeDetails;
 import com.gk.dev.quizwhiz.Model.FriendDetails;
+import com.gk.dev.quizwhiz.Model.TopicName;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,7 +24,7 @@ public class WaitForResponseActivity extends AppCompatActivity {
     ValueEventListener responseListener;
     String fbId;
     DatabaseReference userStatus;
-    String selectedTopic;
+    TopicName selectedTopic;
     FriendDetails selectedFriend;
     DatabaseReference challengeReference;
 
@@ -33,7 +34,7 @@ public class WaitForResponseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wait_for_response);
 
-        selectedTopic = Objects.requireNonNull(getIntent().getExtras()).getString("selectedTopic");
+        selectedTopic = (TopicName) Objects.requireNonNull(getIntent().getExtras()).get("selectedTopic");
         selectedFriend = (FriendDetails) getIntent().getExtras().get("selectedFriend");
 
         challengeReference = FirebaseDatabase.getInstance().getReference().child("Challenges").child(selectedFriend.getFbId());
@@ -70,12 +71,12 @@ public class WaitForResponseActivity extends AppCompatActivity {
                 } else if (challengeDetails.getIsAccepted() == 1) {
                     Intent intent = new Intent(WaitForResponseActivity.this, QuestionActivity.class);
                     ChallengeDetails challengeDetails1 = new ChallengeDetails();
-                    challengeDetails.setFbId(selectedFriend.getFbId());
-                    challengeDetails.setName(selectedFriend.getName());
-                    challengeDetails.setPicture(selectedFriend.getPictureURL());
-                    challengeDetails.setTopic(selectedTopic);
+                    challengeDetails1.setFbId(selectedFriend.getFbId());
+                    challengeDetails1.setName(selectedFriend.getName());
+                    challengeDetails1.setPicture(selectedFriend.getPictureURL());
+                    challengeDetails1.setTopic(selectedTopic.getTopic());
+                    challengeDetails1.setNumbers(challengeDetails.getNumbers());
                     intent.putExtra("challengeDetails", challengeDetails1);
-                    intent.putExtra("checker" , "1");
                     startActivity(intent);
                     finish();
                 }

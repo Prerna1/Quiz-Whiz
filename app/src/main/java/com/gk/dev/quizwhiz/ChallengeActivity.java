@@ -22,6 +22,7 @@ import com.facebook.Profile;
 import com.gk.dev.quizwhiz.Adapters.ChallengeAdapter;
 import com.gk.dev.quizwhiz.Model.ChallengeDetails;
 import com.gk.dev.quizwhiz.Model.FriendDetails;
+import com.gk.dev.quizwhiz.Model.TopicName;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -43,7 +44,8 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
     boolean friendsRetrieved;
     ValueEventListener challengeListener;
     DatabaseReference challenges, userStatus;
-    String fbId, selectedTopic;
+    String fbId;
+    TopicName selectedTopic;
     List<FriendDetails> friends;
     RecyclerView recyclerView;
     ChallengeDetails challengerInformation;
@@ -57,7 +59,7 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_challenge);
 
-        selectedTopic = Objects.requireNonNull(getIntent().getExtras()).getString("selectedTopic");
+        selectedTopic = (TopicName) Objects.requireNonNull(getIntent().getExtras()).get("selectedTopic");
         progressBar = findViewById(R.id.pb_challenge);
 
         friendsRetrieved = false;
@@ -199,7 +201,7 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
-                if (challengerInformation != null) {
+                if (challengerInformation != null && !challengerInformation.getTopic().equals("null")) {
                     Intent intent = new Intent(ChallengeActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
                     startActivity(intent);
@@ -229,9 +231,18 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
             Toast.makeText(this, "The person is currently Busy!", Toast.LENGTH_SHORT).show();
         } else {
             Intent intent = new Intent(ChallengeActivity.this, WaitForResponseActivity.class);
-            ChallengeDetails challengeDetails = new ChallengeDetails(profile.getName(), profile.getProfilePictureUri(1000, 1000).toString(), fbId, selectedTopic);
+            ChallengeDetails challengeDetails = new ChallengeDetails(profile.getName(), profile.getProfilePictureUri(1000, 1000).toString(), fbId, selectedTopic.getTopic());
+            ArrayList<Integer> numbers = new ArrayList<>(), subNumbers;
+            for (int i = 0; i < selectedTopic.getnQuestions(); i++) {
+                numbers.add(i);
+            }
+            Collections.shuffle(numbers);
+            subNumbers= new ArrayList<>(numbers.subList(0, 7));
+            challengeDetails.setNumbers(subNumbers);
+
             DatabaseReference challenge = FirebaseDatabase.getInstance().getReference().child("Challenges").child(selectedFriend.getFbId());
             challenge.setValue(challengeDetails);
+
             intent.putExtra("selectedFriend", selectedFriend);
             intent.putExtra("selectedTopic", selectedTopic);
             startActivity(intent);

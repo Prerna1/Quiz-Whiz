@@ -10,7 +10,6 @@ public class ChallengeDetails implements Serializable {
 
     public ChallengeDetails() {
         isAccepted = 0;
-        numbers = new ArrayList<>();
     }
 
     public ChallengeDetails(String name, String picture, String fbId, String topic) {
@@ -18,7 +17,6 @@ public class ChallengeDetails implements Serializable {
         this.picture = picture;
         this.fbId = fbId;
         this.topic = topic;
-        numbers = new ArrayList<>();
     }
 
     public String getName() {

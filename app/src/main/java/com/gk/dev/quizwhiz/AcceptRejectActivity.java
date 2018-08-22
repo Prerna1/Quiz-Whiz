@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,9 +18,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 
 public class AcceptRejectActivity extends AppCompatActivity {
@@ -31,9 +27,6 @@ public class AcceptRejectActivity extends AppCompatActivity {
     DatabaseReference userStatus, cancellation;
     ValueEventListener cancellationListener;
     ChallengeDetails challengeDetails;
-    private int numberOfQuestions,j;
-    ArrayList<Integer> numbers,subNumbers;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,30 +59,10 @@ public class AcceptRejectActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 cancellation.child("isAccepted").setValue(1);
-                FirebaseDatabase.getInstance().getReference().child("Questions").child("Tech").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        numberOfQuestions = (int) dataSnapshot.getChildrenCount();
-                        numbers = new ArrayList<>();
-                        for (j = 0; j < numberOfQuestions; j++) {
-                            numbers.add(j);
-                        }
-                        Collections.shuffle(numbers);
-                        subNumbers= new ArrayList(numbers.subList(0, 7));
-                        challengeDetails.setNumbers(subNumbers);
-                        Log.d("array",Arrays.toString(subNumbers.toArray()));
-                        Intent intent = new Intent(AcceptRejectActivity.this, QuestionActivity.class);
-                        intent.putExtra("challengeDetails", challengeDetails);
-                        intent.putExtra("checker","0");
-                        startActivity(intent);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
+                Intent intent = new Intent(AcceptRejectActivity.this, QuestionActivity.class);
+                challengeDetails.setFbId(fbId);
+                intent.putExtra("challengeDetails", challengeDetails);
+                startActivity(intent);
             }
         });
 
