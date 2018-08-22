@@ -77,6 +77,11 @@ public class AcceptRejectActivity extends AppCompatActivity {
                         Collections.shuffle(numbers);
                         subNumbers= new ArrayList(numbers.subList(0, 7));
                         challengeDetails.setNumbers(subNumbers);
+                        Log.d("array",Arrays.toString(subNumbers.toArray()));
+                        Intent intent = new Intent(AcceptRejectActivity.this, QuestionActivity.class);
+                        intent.putExtra("challengeDetails", challengeDetails);
+                        intent.putExtra("checker","0");
+                        startActivity(intent);
                     }
 
                     @Override
@@ -84,10 +89,7 @@ public class AcceptRejectActivity extends AppCompatActivity {
 
                     }
                 });
-                challengeDetails.setChecker(0);
-                Intent intent = new Intent(AcceptRejectActivity.this, QuestionActivity.class);
-                intent.putExtra("challengeDetails", challengeDetails);
-                startActivity(intent);
+
             }
         });
 

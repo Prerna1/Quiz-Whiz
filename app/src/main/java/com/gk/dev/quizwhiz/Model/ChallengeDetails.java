@@ -5,12 +5,11 @@ import java.util.ArrayList;
 
 public class ChallengeDetails implements Serializable {
     public String name, picture, fbId, topic;
-    public int isAccepted,checker;
+    public int isAccepted;
     public ArrayList<Integer> numbers;
 
     public ChallengeDetails() {
         isAccepted = 0;
-        checker =0;
         numbers = new ArrayList<>();
     }
 
@@ -70,11 +69,4 @@ public class ChallengeDetails implements Serializable {
         this.numbers = numbers;
     }
 
-    public int getChecker() {
-        return checker;
-    }
-
-    public void setChecker(int checker) {
-        this.checker = checker;
-    }
 }

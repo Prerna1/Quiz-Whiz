@@ -38,9 +38,10 @@ public class QuestionActivity extends AppCompatActivity {
     ArrayList<Question> questions;
     ArrayList<Integer> numbers,arrayList;
     DatabaseReference databaseReference;
-    private String fbid, myFbid , c1, c2, c3, c4, ca, q , questionNumber;
+    private String fbid, myFbid , c1, c2, c3, c4, ca, q , questionNumber,checker;
     private ProgressBar progressBar;
     ChallengeDetails challengeDetails;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,12 +50,15 @@ public class QuestionActivity extends AppCompatActivity {
         Profile profile = Profile.getCurrentProfile();
         myFbid = profile.getId();
         challengeDetails = new ChallengeDetails();
-       challengeDetails = (ChallengeDetails) getIntent().getSerializableExtra("challengeDetails");
-       if(challengeDetails.getChecker()==0){
+        challengeDetails = (ChallengeDetails) getIntent().getSerializableExtra("challengeDetails");
+        Bundle bundle = getIntent().getExtras();
+        String checker = bundle.getString("checker");
+         if(checker.equals("0")){
            fbid = myFbid;
        }else{
            fbid = challengeDetails.getFbId();
        }
+       Log.d("prerna",fbid);
         questions = new ArrayList<>();
         RelativeLayout layout = findViewById(R.id.root_layout);
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -84,21 +88,9 @@ public class QuestionActivity extends AppCompatActivity {
         score = findViewById(R.id.score);
         i = 0;
         k = 0;
-        databaseReference.child("Challenges").child(fbid).child("count").setValue(1);
+        databaseReference.child("Challenges").child(fbid).child("count").setValue(0);
         databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").setValue(0);
         score.setVisibility(View.GONE);
-        databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                int dataSnapshotValue = dataSnapshot.getValue(Integer.class);
-                score.setText(Integer.toString(dataSnapshotValue));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
 
         databaseReference.child("Challenges").child(fbid).child("count").addValueEventListener(new ValueEventListener() {
             @Override
@@ -135,56 +127,70 @@ public class QuestionActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        numbers = new ArrayList<>();
-        numbers = challengeDetails.getNumbers();
-        Question question1 = new Question();
-        for(j=0;j<7;j++)
-            questions.add(question1);
-        for (j = 0; j < 7; j++) {
-            questionNumber = Integer.toString(numbers.get(j));
+        databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                int dataSnapshotValue = dataSnapshot.getValue(Integer.class);
+                score.setText(Integer.toString(dataSnapshotValue));
+                numbers = new ArrayList<>();
+                numbers = challengeDetails.getNumbers();
+                Question question1 = new Question();
+                for(j=0;j<7;j++)
+                    questions.add(question1);
+                for (j = 0; j < 7; j++) {
+                    Log.d("array",Integer.toString(numbers.get(j)));
+                    questionNumber = Integer.toString(numbers.get(j));
 
-            databaseReference.child("Questions").child(challengeDetails.getTopic()).child(questionNumber).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    question = new Question();
-                    question = dataSnapshot.getValue(Question.class);
-                    Log.d("peda", dataSnapshot.toString());
-                    int ind = arrayList.indexOf(Integer.parseInt(dataSnapshot.getKey()));
-                    questions.set(ind, question);
-                    k++;
-                    if (k == 7) {
-                        progressBar.setVisibility(View.GONE);
-                        timer.setVisibility(View.VISIBLE);
-                        timeTextView.setVisibility(View.VISIBLE);
-                        scoreTextView.setVisibility(View.VISIBLE);
-                        score.setVisibility(View.VISIBLE);
-                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                        databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
-                            @Override
-                            public Transaction.Result doTransaction(MutableData mutableData) {
-                                if (mutableData.getValue() == null) {
-                                    mutableData.setValue(1);
-                                } else {
-                                    int count = mutableData.getValue(Integer.class);
-                                    mutableData.setValue(count + 1);
-                                }
-                                return Transaction.success(mutableData);
+                    databaseReference.child("Questions").child(challengeDetails.getTopic()).child(questionNumber).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            question = new Question();
+                            question = dataSnapshot.getValue(Question.class);
+                            Log.d("peda", dataSnapshot.toString());
+                            int ind = arrayList.indexOf(Integer.parseInt(dataSnapshot.getKey()));
+                            questions.set(ind, question);
+                            k++;
+                            if (k == 7) {
+                                progressBar.setVisibility(View.GONE);
+                                timer.setVisibility(View.VISIBLE);
+                                timeTextView.setVisibility(View.VISIBLE);
+                                scoreTextView.setVisibility(View.VISIBLE);
+                                score.setVisibility(View.VISIBLE);
+                                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                                databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
+                                    @Override
+                                    public Transaction.Result doTransaction(MutableData mutableData) {
+                                        if (mutableData.getValue() == null) {
+                                            mutableData.setValue(1);
+                                        } else {
+                                            int count = mutableData.getValue(Integer.class);
+                                            mutableData.setValue(count + 1);
+                                        }
+                                        return Transaction.success(mutableData);
+                                    }
+
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                                        // Analyse databaseError for any error during increment
+                                    }
+                                });
                             }
+                        }
 
-                            @Override
-                            public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
-                                // Analyse databaseError for any error during increment
-                            }
-                        });
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                 }
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            });
-        }
+            }
+        });
+
 
     }
 
