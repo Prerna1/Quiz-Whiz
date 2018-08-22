@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,14 +13,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.Profile;
 import com.gk.dev.quizwhiz.Model.ChallengeDetails;
 import com.gk.dev.quizwhiz.Model.Question;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,7 +28,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 public class QuestionActivity extends AppCompatActivity {
     CountDownTimer countDownTimer;
@@ -41,20 +36,25 @@ public class QuestionActivity extends AppCompatActivity {
     Integer i, numberOfQuestions, j, k;
     Question question;
     ArrayList<Question> questions;
-    ArrayList<Integer> numbers;
+    ArrayList<Integer> numbers,arrayList;
     DatabaseReference databaseReference;
-    private String fbid, c1, c2, c3, c4, ca, q;
+    private String fbid, myFbid , c1, c2, c3, c4, ca, q , questionNumber;
     private ProgressBar progressBar;
     ChallengeDetails challengeDetails;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question);
         timer = findViewById(R.id.tv_timer);
         Profile profile = Profile.getCurrentProfile();
-        fbid = profile.getId();
-        challengeDetails = (ChallengeDetails) getIntent().getSerializableExtra("challengeDetails");
+        myFbid = profile.getId();
+        challengeDetails = new ChallengeDetails();
+       challengeDetails = (ChallengeDetails) getIntent().getSerializableExtra("challengeDetails");
+       if(challengeDetails.getChecker()==0){
+           fbid = myFbid;
+       }else{
+           fbid = challengeDetails.getFbId();
+       }
         questions = new ArrayList<>();
         RelativeLayout layout = findViewById(R.id.root_layout);
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -84,10 +84,10 @@ public class QuestionActivity extends AppCompatActivity {
         score = findViewById(R.id.score);
         i = 0;
         k = 0;
-        databaseReference.child("Challenges").child("count").setValue(0);
-        databaseReference.child("Challenges").child(fbid).child("score").setValue(0);
+        databaseReference.child("Challenges").child(fbid).child("count").setValue(1);
+        databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").setValue(0);
         score.setVisibility(View.GONE);
-        databaseReference.child("Challenges").child(fbid).child("score").addValueEventListener(new ValueEventListener() {
+        databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int dataSnapshotValue = dataSnapshot.getValue(Integer.class);
@@ -99,7 +99,8 @@ public class QuestionActivity extends AppCompatActivity {
 
             }
         });
-        databaseReference.child("Challenges").child("count").addValueEventListener(new ValueEventListener() {
+
+        databaseReference.child("Challenges").child(fbid).child("count").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int count = dataSnapshot.getValue(Integer.class);
@@ -134,52 +135,56 @@ public class QuestionActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        databaseReference.child("Questions").child("Tech").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                numberOfQuestions = (int) dataSnapshot.getChildrenCount();
-                Log.d("prerna", Integer.toString(numberOfQuestions));
-                numbers = new ArrayList<>();
-                for (j = 0; j < numberOfQuestions; j++) {
-                    numbers.add(j);
-                }
-                Log.d("prerna", Arrays.toString(numbers.toArray()));
-                Collections.shuffle(numbers);
-                Log.d("prerna", Arrays.toString(numbers.toArray()));
-                for (j = 0; j < 7; j++) {
-                    databaseReference.child("Questions").child("Tech").child(Integer.toString(numbers.get(j))).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            question = new Question();
-                            question = dataSnapshot.getValue(Question.class);
-                            Log.d("peda", dataSnapshot.toString());
-                            questions.add(question);
-                            k++;
-                            if (k == 7) {
-                                progressBar.setVisibility(View.GONE);
-                                timer.setVisibility(View.VISIBLE);
-                                timeTextView.setVisibility(View.VISIBLE);
-                                scoreTextView.setVisibility(View.VISIBLE);
-                                score.setVisibility(View.VISIBLE);
-                                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                                fireNextQuestion();
+        numbers = new ArrayList<>();
+        numbers = challengeDetails.getNumbers();
+        Question question1 = new Question();
+        for(j=0;j<7;j++)
+            questions.add(question1);
+        for (j = 0; j < 7; j++) {
+            questionNumber = Integer.toString(numbers.get(j));
+
+            databaseReference.child("Questions").child(challengeDetails.getTopic()).child(questionNumber).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    question = new Question();
+                    question = dataSnapshot.getValue(Question.class);
+                    Log.d("peda", dataSnapshot.toString());
+                    int ind = arrayList.indexOf(Integer.parseInt(dataSnapshot.getKey()));
+                    questions.set(ind, question);
+                    k++;
+                    if (k == 7) {
+                        progressBar.setVisibility(View.GONE);
+                        timer.setVisibility(View.VISIBLE);
+                        timeTextView.setVisibility(View.VISIBLE);
+                        scoreTextView.setVisibility(View.VISIBLE);
+                        score.setVisibility(View.VISIBLE);
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
+                            @Override
+                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                if (mutableData.getValue() == null) {
+                                    mutableData.setValue(1);
+                                } else {
+                                    int count = mutableData.getValue(Integer.class);
+                                    mutableData.setValue(count + 1);
+                                }
+                                return Transaction.success(mutableData);
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
+                            @Override
+                            public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                                // Analyse databaseError for any error during increment
+                            }
+                        });
+                    }
                 }
 
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+                }
+            });
+        }
 
     }
 
@@ -187,7 +192,7 @@ public class QuestionActivity extends AppCompatActivity {
         if (i < 7) {
             Log.d("abc", Integer.toString(i));
             Log.d("abc", questions.get(i).getQuestionText());
-            databaseReference.child("Challenges").child("count").setValue(0);
+            databaseReference.child("Challenges").child(fbid).child("count").setValue(0);
             choice1.setEnabled(true);
             choice2.setEnabled(true);
             choice3.setEnabled(true);
@@ -226,7 +231,7 @@ public class QuestionActivity extends AppCompatActivity {
                             choice2.setEnabled(false);
                             choice3.setEnabled(false);
                             choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
+                            databaseReference.child("Challenges").child(fbid).child("count").runTransaction(new Transaction.Handler() {
                                 @Override
                                 public Transaction.Result doTransaction(MutableData mutableData) {
                                     if (mutableData.getValue() == null) {
@@ -245,7 +250,7 @@ public class QuestionActivity extends AppCompatActivity {
                             });
                             if (c1.equalsIgnoreCase(ca)) {
                                 choice1.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(fbid).child("score").runTransaction(new Transaction.Handler() {
+                                databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").runTransaction(new Transaction.Handler() {
 
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
@@ -276,7 +281,7 @@ public class QuestionActivity extends AppCompatActivity {
                             choice2.setEnabled(false);
                             choice3.setEnabled(false);
                             choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
+                            databaseReference.child("Challenges").child(fbid).child("count").runTransaction(new Transaction.Handler() {
                                 @Override
                                 public Transaction.Result doTransaction(MutableData mutableData) {
                                     if (mutableData.getValue() == null) {
@@ -295,7 +300,7 @@ public class QuestionActivity extends AppCompatActivity {
                             });
                             if (c2.equalsIgnoreCase(ca)) {
                                 choice2.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(fbid).child("score").runTransaction(new Transaction.Handler() {
+                                databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").runTransaction(new Transaction.Handler() {
 
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
@@ -326,7 +331,7 @@ public class QuestionActivity extends AppCompatActivity {
                             choice2.setEnabled(false);
                             choice3.setEnabled(false);
                             choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
+                            databaseReference.child("Challenges").child(fbid).child("count").runTransaction(new Transaction.Handler() {
                                 @Override
                                 public Transaction.Result doTransaction(MutableData mutableData) {
                                     if (mutableData.getValue() == null) {
@@ -345,7 +350,7 @@ public class QuestionActivity extends AppCompatActivity {
                             });
                             if (c3.equalsIgnoreCase(ca)) {
                                 choice3.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(fbid).child("score").runTransaction(new Transaction.Handler() {
+                                databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").runTransaction(new Transaction.Handler() {
 
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
@@ -376,7 +381,7 @@ public class QuestionActivity extends AppCompatActivity {
                             choice2.setEnabled(false);
                             choice3.setEnabled(false);
                             choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
+                            databaseReference.child("Challenges").child(fbid).child("count").runTransaction(new Transaction.Handler() {
                                 @Override
                                 public Transaction.Result doTransaction(MutableData mutableData) {
                                     if (mutableData.getValue() == null) {
@@ -395,7 +400,7 @@ public class QuestionActivity extends AppCompatActivity {
                             });
                             if (c4.equalsIgnoreCase(ca)) {
                                 choice4.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(fbid).child("score").runTransaction(new Transaction.Handler() {
+                                databaseReference.child("Challenges").child(fbid).child(myFbid).child("score").runTransaction(new Transaction.Handler() {
 
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
@@ -420,13 +425,7 @@ public class QuestionActivity extends AppCompatActivity {
                         }
                     });
                     i++;
-                    final Handler handler1 = new Handler();
-                    handler1.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            countDownTimer.start();
-                        }
-                    }, 500);
+                    countDownTimer.start();
 
                 }
             }, 3000);
