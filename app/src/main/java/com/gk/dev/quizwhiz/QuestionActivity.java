@@ -1,5 +1,7 @@
 package com.gk.dev.quizwhiz;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -31,12 +33,12 @@ import java.util.Objects;
 
 public class QuestionActivity extends AppCompatActivity {
     CountDownTimer countDownTimer;
-    TextView timer, questionText, score, timeTextView, scoreTextView;
+    TextView timer, questionText, user1scoreTextView , user2scoreTextView , user1 , user2;
     Button choice1, choice2, choice3, choice4;
-    Integer i, numberOfQuestions, j, k;
+    Integer i, j, k;
     Question question;
     ArrayList<Question> questions;
-    ArrayList<Integer> numbers, arrayList;
+    ArrayList<Integer> numbers;
     DatabaseReference databaseReference;
     ChallengeDetails challengeDetails;
     private String fbId, c1, c2, c3, c4, ca, q, questionNumber;
@@ -48,7 +50,7 @@ public class QuestionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_question);
 
         timer = findViewById(R.id.tv_timer);
-        Profile profile = Profile.getCurrentProfile();
+        final Profile profile = Profile.getCurrentProfile();
         fbId = profile.getId();
 
         challengeDetails = (ChallengeDetails) Objects.requireNonNull(getIntent().getExtras()).get("challengeDetails");
@@ -61,15 +63,19 @@ public class QuestionActivity extends AppCompatActivity {
         layout.addView(progressBar, params);
         progressBar.setVisibility(View.GONE);
         questionText = findViewById(R.id.question);
-        timeTextView = findViewById(R.id.time);
-        scoreTextView = findViewById(R.id.tv_score);
+        user1scoreTextView = findViewById(R.id.score1);
+        user2scoreTextView = findViewById(R.id.score2);
+        user1 = findViewById(R.id.user1);
+        user2 = findViewById(R.id.user2);
         choice1 = findViewById(R.id.choice1);
         choice2 = findViewById(R.id.choice2);
         choice3 = findViewById(R.id.choice3);
         choice4 = findViewById(R.id.choice4);
         timer.setVisibility(View.GONE);
-        timeTextView.setVisibility(View.GONE);
-        scoreTextView.setVisibility(View.GONE);
+        user1scoreTextView.setVisibility(View.GONE);
+        user2scoreTextView.setVisibility(View.GONE);
+        user1.setVisibility(View.GONE);
+        user2.setVisibility(View.GONE);
         choice1.setVisibility(View.GONE);
         choice2.setVisibility(View.GONE);
         choice3.setVisibility(View.GONE);
@@ -78,22 +84,31 @@ public class QuestionActivity extends AppCompatActivity {
         choice2.setBackgroundColor(Color.WHITE);
         choice3.setBackgroundColor(Color.WHITE);
         choice4.setBackgroundColor(Color.WHITE);
-        score = findViewById(R.id.score);
         i = 0;
         k = 0;
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").setValue(0);
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").setValue(0);
-        score.setVisibility(View.GONE);
 
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int count = dataSnapshot.getValue(Integer.class);
-                if (i == numberOfQuestions && count == 2) {
-                    startActivity(new Intent(QuestionActivity.this, ResultActivity.class));
+                if (i == 7 && count == 2) {
+                    Intent  intent = new Intent(QuestionActivity.this, ResultActivity.class);
+                    intent.putExtra("challengeDetails", challengeDetails);
+                    intent.putExtra("user1Score",user1scoreTextView.getText().toString());
+                    intent.putExtra("user2Score",user2scoreTextView.getText().toString());
+                    startActivity(intent);
+
                 } else {
                     if (count == 2) {
-                        fireNextQuestion();
+                        countDownTimer.cancel();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                fireNextQuestion();
+                            }
+                        }, 1000);
                     }
                 }
             }
@@ -119,11 +134,25 @@ public class QuestionActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getFbId()).child("score").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                user2.setText(challengeDetails.getName());
+                int dataSnapshotValue = dataSnapshot.getValue(Integer.class);
+                user2scoreTextView.setText(Integer.toString(dataSnapshotValue));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                user1.setText(profile.getName());
                 int dataSnapshotValue = dataSnapshot.getValue(Integer.class);
-                score.setText(Integer.toString(dataSnapshotValue));
+                user1scoreTextView.setText(Integer.toString(dataSnapshotValue));
                 numbers = new ArrayList<>();
                 numbers = challengeDetails.getNumbers();
                 Question question1 = new Question();
@@ -144,27 +173,12 @@ public class QuestionActivity extends AppCompatActivity {
                             if (k == 7) {
                                 progressBar.setVisibility(View.GONE);
                                 timer.setVisibility(View.VISIBLE);
-                                timeTextView.setVisibility(View.VISIBLE);
-                                scoreTextView.setVisibility(View.VISIBLE);
-                                score.setVisibility(View.VISIBLE);
+                                user1scoreTextView.setVisibility(View.VISIBLE);
+                                user1.setVisibility(View.VISIBLE);
+                                user2.setVisibility(View.VISIBLE);
+                                user2scoreTextView.setVisibility(View.VISIBLE);
                                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                                databaseReference.child("Challenges").child("count").runTransaction(new Transaction.Handler() {
-                                    @Override
-                                    public Transaction.Result doTransaction(MutableData mutableData) {
-                                        if (mutableData.getValue() == null) {
-                                            mutableData.setValue(1);
-                                        } else {
-                                            int count = mutableData.getValue(Integer.class);
-                                            mutableData.setValue(count + 1);
-                                        }
-                                        return Transaction.success(mutableData);
-                                    }
-
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
-                                        // Analyse databaseError for any error during increment
-                                    }
-                                });
+                                fireNextQuestion();
                             }
                         }
 
@@ -182,7 +196,23 @@ public class QuestionActivity extends AppCompatActivity {
             }
         });
 
-
+        }
+    @Override
+    public void onBackPressed() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to surrender? ");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+               startActivity(new Intent(QuestionActivity.this,DashboardActivity.class));
+                QuestionActivity.super.onBackPressed();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
     }
 
     public void fireNextQuestion() {
@@ -190,6 +220,7 @@ public class QuestionActivity extends AppCompatActivity {
             Log.d("abc", Integer.toString(i));
             Log.d("abc", questions.get(i).getQuestionText());
             databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").setValue(0);
+            timer.setText("10");
             choice1.setEnabled(true);
             choice2.setEnabled(true);
             choice3.setEnabled(true);
@@ -428,7 +459,11 @@ public class QuestionActivity extends AppCompatActivity {
             }, 3000);
 
         } else {
-            startActivity(new Intent(QuestionActivity.this, ResultActivity.class));
+            Intent  intent = new Intent(QuestionActivity.this, ResultActivity.class);
+            intent.putExtra("challengeDetails", challengeDetails);
+            intent.putExtra("user1Score",user1scoreTextView.getText().toString());
+            intent.putExtra("user2Score",user2scoreTextView.getText().toString());
+            startActivity(intent);
         }
     }
 }
