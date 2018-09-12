@@ -33,7 +33,7 @@ import java.util.Objects;
 
 public class QuestionActivity extends AppCompatActivity {
     CountDownTimer countDownTimer;
-    TextView timer, questionText, user1scoreTextView , user2scoreTextView , user1 , user2;
+    TextView timer, questionText, user1scoreTextView, user2scoreTextView, user1, user2;
     Button choice1, choice2, choice3, choice4;
     Integer i, j, k;
     Question question;
@@ -41,6 +41,7 @@ public class QuestionActivity extends AppCompatActivity {
     ArrayList<Integer> numbers;
     DatabaseReference databaseReference;
     ChallengeDetails challengeDetails;
+    DatabaseReference userStatus;
     private String fbId, c1, c2, c3, c4, ca, q, questionNumber;
     private ProgressBar progressBar;
 
@@ -52,6 +53,10 @@ public class QuestionActivity extends AppCompatActivity {
         timer = findViewById(R.id.tv_timer);
         final Profile profile = Profile.getCurrentProfile();
         fbId = profile.getId();
+
+        userStatus = FirebaseDatabase.getInstance().getReference().child("UserDetails/" + fbId + "/status");
+        userStatus.onDisconnect().setValue(0);
+        userStatus.setValue(2);
 
         challengeDetails = (ChallengeDetails) Objects.requireNonNull(getIntent().getExtras()).get("challengeDetails");
         questions = new ArrayList<>();
@@ -94,10 +99,10 @@ public class QuestionActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int count = dataSnapshot.getValue(Integer.class);
                 if (i == 7 && count == 2) {
-                    Intent  intent = new Intent(QuestionActivity.this, ResultActivity.class);
+                    Intent intent = new Intent(QuestionActivity.this, ResultActivity.class);
                     intent.putExtra("challengeDetails", challengeDetails);
-                    intent.putExtra("user1Score",user1scoreTextView.getText().toString());
-                    intent.putExtra("user2Score",user2scoreTextView.getText().toString());
+                    intent.putExtra("user1Score", user1scoreTextView.getText().toString());
+                    intent.putExtra("user2Score", user2scoreTextView.getText().toString());
                     startActivity(intent);
 
                 } else {
@@ -196,14 +201,15 @@ public class QuestionActivity extends AppCompatActivity {
             }
         });
 
-        }
+    }
+
     @Override
     public void onBackPressed() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you want to surrender? ");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-               startActivity(new Intent(QuestionActivity.this,DashboardActivity.class));
+                startActivity(new Intent(QuestionActivity.this, DashboardActivity.class));
                 QuestionActivity.super.onBackPressed();
             }
         });
@@ -459,11 +465,23 @@ public class QuestionActivity extends AppCompatActivity {
             }, 3000);
 
         } else {
-            Intent  intent = new Intent(QuestionActivity.this, ResultActivity.class);
+            Intent intent = new Intent(QuestionActivity.this, ResultActivity.class);
             intent.putExtra("challengeDetails", challengeDetails);
-            intent.putExtra("user1Score",user1scoreTextView.getText().toString());
-            intent.putExtra("user2Score",user2scoreTextView.getText().toString());
+            intent.putExtra("user1Score", user1scoreTextView.getText().toString());
+            intent.putExtra("user2Score", user2scoreTextView.getText().toString());
             startActivity(intent);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        userStatus.setValue(0);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        userStatus.setValue(2);
     }
 }

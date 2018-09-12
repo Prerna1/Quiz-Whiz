@@ -1,8 +1,8 @@
 package com.gk.dev.quizwhiz;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -16,13 +16,12 @@ public class RedirectActivity extends AppCompatActivity {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        if(currentUser==null){
+        if (currentUser == null) {
             finish();
             startActivity(new Intent(RedirectActivity.this, LoginActivity.class));
-        }
-        else{
+        } else {
             finish();
-            startActivity(new Intent(RedirectActivity.this,DashboardActivity.class));
+            startActivity(new Intent(RedirectActivity.this, DashboardActivity.class));
         }
     }
 }
