@@ -59,6 +59,7 @@ public class AcceptRejectActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 cancellation.child("isAccepted").setValue(1);
+                cancellation.child("active").setValue(1);
                 Intent intent = new Intent(AcceptRejectActivity.this, QuestionActivity.class);
                 challengeDetails.setFbId(fbId);
                 intent.putExtra("challengeDetails", challengeDetails);

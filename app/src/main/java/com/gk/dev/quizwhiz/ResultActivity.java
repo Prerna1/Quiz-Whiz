@@ -82,7 +82,7 @@ public class ResultActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
-                if (challengerInformation != null && !challengerInformation.getTopic().equals("null")) {
+                if (challengerInformation != null && !challengerInformation.getTopic().equals("null") && challengerInformation.active == 0) {
                     Intent intent = new Intent(ResultActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
                     startActivity(intent);

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class ChallengeDetails implements Serializable {
     public String name, picture, fbId, topic;
-    public int isAccepted;
+    public int isAccepted, active;
     public ArrayList<Integer> numbers;
 
     public ChallengeDetails() {
@@ -21,6 +21,14 @@ public class ChallengeDetails implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public void setActive(int active) {
+        this.active = active;
     }
 
     public void setName(String name) {

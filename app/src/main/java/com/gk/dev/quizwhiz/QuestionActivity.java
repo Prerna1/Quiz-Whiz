@@ -143,7 +143,10 @@ public class QuestionActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 user2.setText(challengeDetails.getName());
-                int dataSnapshotValue = dataSnapshot.getValue(Integer.class);
+                int dataSnapshotValue = 0;
+                if (dataSnapshot.getValue(Integer.class) != null) {
+                    dataSnapshotValue = dataSnapshot.getValue(Integer.class);
+                }
                 user2scoreTextView.setText(Integer.toString(dataSnapshotValue));
             }
 
@@ -156,7 +159,9 @@ public class QuestionActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 user1.setText(profile.getName());
-                int dataSnapshotValue = dataSnapshot.getValue(Integer.class);
+                int dataSnapshotValue = 0;
+                if (dataSnapshot.getValue(Integer.class) != null)
+                    dataSnapshotValue = dataSnapshot.getValue(Integer.class);
                 user1scoreTextView.setText(Integer.toString(dataSnapshotValue));
                 numbers = new ArrayList<>();
                 numbers = challengeDetails.getNumbers();
@@ -470,6 +475,7 @@ public class QuestionActivity extends AppCompatActivity {
             intent.putExtra("user1Score", user1scoreTextView.getText().toString());
             intent.putExtra("user2Score", user2scoreTextView.getText().toString());
             startActivity(intent);
+            finish();
         }
     }
 

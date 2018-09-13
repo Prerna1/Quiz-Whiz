@@ -201,7 +201,7 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
-                if (challengerInformation != null && !challengerInformation.getTopic().equals("null")) {
+                if (challengerInformation != null && !challengerInformation.getTopic().equals("null") && challengerInformation.active == 0) {
                     Intent intent = new Intent(ChallengeActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
                     startActivity(intent);
@@ -239,7 +239,7 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
             Collections.shuffle(numbers);
             subNumbers= new ArrayList<>(numbers.subList(0, 7));
             challengeDetails.setNumbers(subNumbers);
-
+            challengeDetails.setActive(0);
             DatabaseReference challenge = FirebaseDatabase.getInstance().getReference().child("Challenges").child(selectedFriend.getFbId());
             challenge.setValue(challengeDetails);
 

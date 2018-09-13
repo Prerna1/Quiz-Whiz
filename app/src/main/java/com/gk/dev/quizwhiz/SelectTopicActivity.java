@@ -167,7 +167,7 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
-                if (challengerInformation != null && !challengerInformation.getTopic().equals("null")) {
+                if (challengerInformation != null && !challengerInformation.getTopic().equals("null") && challengerInformation.active == 0) {
                     Intent intent = new Intent(SelectTopicActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
                     startActivity(intent);

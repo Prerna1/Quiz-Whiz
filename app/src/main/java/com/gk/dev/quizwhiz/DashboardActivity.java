@@ -1,9 +1,9 @@
 package com.gk.dev.quizwhiz;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -139,7 +139,7 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 challengerInformation = dataSnapshot.getValue(ChallengeDetails.class);
-                if (challengerInformation != null && !challengerInformation.getTopic().equals("null")) {
+                if (challengerInformation != null && !challengerInformation.getTopic().equals("null") && challengerInformation.active == 0) {
                     Intent intent = new Intent(DashboardActivity.this, AcceptRejectActivity.class);
                     intent.putExtra("challengeDetails", challengerInformation);
                     startActivity(intent);
