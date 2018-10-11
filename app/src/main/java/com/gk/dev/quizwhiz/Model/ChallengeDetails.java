@@ -4,12 +4,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class ChallengeDetails implements Serializable {
-    public String name, picture, fbId, topic;
+    public String name, picture, fbId, topic, opponentFbId;
     public int isAccepted, active;
     public ArrayList<Integer> numbers;
 
     public ChallengeDetails() {
         isAccepted = 0;
+    }
+
+    public String getOpponentFbId() {
+        return opponentFbId;
+    }
+
+    public void setOpponentFbId(String opponentFbId) {
+        this.opponentFbId = opponentFbId;
     }
 
     public ChallengeDetails(String name, String picture, String fbId, String topic) {

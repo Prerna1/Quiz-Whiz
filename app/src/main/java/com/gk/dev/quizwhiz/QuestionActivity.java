@@ -44,6 +44,9 @@ public class QuestionActivity extends AppCompatActivity {
     DatabaseReference userStatus;
     private String fbId, c1, c2, c3, c4, ca, q, questionNumber;
     private ProgressBar progressBar;
+    private DatabaseReference friendStatus;
+    private ValueEventListener statusListener;
+    private RelativeLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +63,7 @@ public class QuestionActivity extends AppCompatActivity {
 
         challengeDetails = (ChallengeDetails) Objects.requireNonNull(getIntent().getExtras()).get("challengeDetails");
         questions = new ArrayList<>();
-        RelativeLayout layout = findViewById(R.id.root_layout);
+        layout = findViewById(R.id.root_layout);
         databaseReference = FirebaseDatabase.getInstance().getReference();
         progressBar = new ProgressBar(QuestionActivity.this, null, android.R.attr.progressBarStyleLarge);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
@@ -92,6 +95,7 @@ public class QuestionActivity extends AppCompatActivity {
         i = 0;
         k = 0;
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").setValue(0);
+        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("questionStatus").setValue(0);
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").setValue(0);
 
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").addValueEventListener(new ValueEventListener() {
@@ -123,6 +127,41 @@ public class QuestionActivity extends AppCompatActivity {
 
             }
         });
+        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("questionStatus").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                int status = dataSnapshot.getValue(Integer.class);
+                    if (status == 1) {
+                        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getOpponentFbId()).child("questionStatus").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                int status1 = dataSnapshot.getValue(Integer.class);
+                                if(status1 == 1){
+                                    progressBar.setVisibility(View.GONE);
+                                    timer.setVisibility(View.VISIBLE);
+                                    user1scoreTextView.setVisibility(View.VISIBLE);
+                                    user1.setVisibility(View.VISIBLE);
+                                    user2.setVisibility(View.VISIBLE);
+                                    user2scoreTextView.setVisibility(View.VISIBLE);
+                                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                                    fireNextQuestion();
+                                }
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         countDownTimer = new CountDownTimer(10000, 1000) {
 
             public void onTick(long millisUntilFinished) {
@@ -139,7 +178,7 @@ public class QuestionActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getFbId()).child("score").addValueEventListener(new ValueEventListener() {
+        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getOpponentFbId()).child("score").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 user2.setText(challengeDetails.getName());
@@ -181,14 +220,7 @@ public class QuestionActivity extends AppCompatActivity {
                             questions.set(ind, question);
                             k++;
                             if (k == 7) {
-                                progressBar.setVisibility(View.GONE);
-                                timer.setVisibility(View.VISIBLE);
-                                user1scoreTextView.setVisibility(View.VISIBLE);
-                                user1.setVisibility(View.VISIBLE);
-                                user2.setVisibility(View.VISIBLE);
-                                user2scoreTextView.setVisibility(View.VISIBLE);
-                                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                                fireNextQuestion();
+                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("questionStatus").setValue(1);
                             }
                         }
 
@@ -210,12 +242,15 @@ public class QuestionActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+//        QuestionActivity.super.onBackPressed();
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you want to surrender? ");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+                databaseReference.child("UserDetails").child(fbId).child("status").setValue(1);
+               startActivity(new Intent(QuestionActivity.this,DashboardActivity.class));
                 startActivity(new Intent(QuestionActivity.this, DashboardActivity.class));
-                QuestionActivity.super.onBackPressed();
+                finish();
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -478,6 +513,34 @@ public class QuestionActivity extends AppCompatActivity {
             finish();
         }
     }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        friendStatus = FirebaseDatabase.getInstance().getReference().child("UserDetails").child(challengeDetails.getFbId()).child("status");
+        statusListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                int status = dataSnapshot.getValue(Integer.class);
+                if (status!=2) {
+                    startActivity(new Intent(QuestionActivity.this,OpponentLeftActivity.class));
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        friendStatus.addValueEventListener(statusListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        friendStatus.removeEventListener(statusListener);
+    }
+
 
     @Override
     protected void onPause() {

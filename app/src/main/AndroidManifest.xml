@@ -43,12 +43,10 @@
         <activity android:name=".SelectTopicActivity" />
         <activity android:name=".AcceptRejectActivity" />
         <activity android:name=".ChallengeActivity" />
-        <activity android:name=".QuestionActivity">
-
-        </activity>
-        <activity android:name=".ResultActivity"></activity>
-        <activity android:name=".WaitForResponseActivity"></activity>
+        <activity android:name=".QuestionActivity"></activity>
+        <activity android:name=".ResultActivity" />
+        <activity android:name=".WaitForResponseActivity" />
+        <activity android:name=".OpponentLeftActivity"></activity>
     </application>
 
 </manifest>
-

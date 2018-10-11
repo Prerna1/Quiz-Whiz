@@ -122,5 +122,8 @@
             android:layout_below="@+id/choice3"
             android:background="@layout/button"
             android:text="Nexus" />
+
     </RelativeLayout>
+
 </ScrollView>
+

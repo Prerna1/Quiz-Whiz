@@ -60,6 +60,14 @@ public class ResultActivity extends AppCompatActivity {
         }
 
     }
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        startActivity(new Intent(ResultActivity.this, DashboardActivity.class));
+        finish();
+
+    }
 
     @Override
     protected void onPause() {

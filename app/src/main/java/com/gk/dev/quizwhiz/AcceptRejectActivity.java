@@ -38,7 +38,7 @@ public class AcceptRejectActivity extends AppCompatActivity {
         TextView tvChallengeDetails = findViewById(R.id.chdetails);
         ImageView ivChallengerImage = findViewById(R.id.chpic);
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
         profile = Profile.getCurrentProfile();
         fbId = profile.getId();
@@ -49,7 +49,7 @@ public class AcceptRejectActivity extends AppCompatActivity {
         userStatus.onDisconnect().setValue(0);
         userStatus.setValue(2);
 
-        String challengeInfo = challengeDetails.getName() + " challenged you in " + challengeDetails.getTopic();
+        final String challengeInfo = challengeDetails.getName() + " challenged you in " + challengeDetails.getTopic();
         tvChallengeDetails.setText(challengeInfo);
         Picasso.with(getApplicationContext()).load(challengeDetails.getPicture()).into(ivChallengerImage);
 
@@ -61,6 +61,7 @@ public class AcceptRejectActivity extends AppCompatActivity {
                 cancellation.child("isAccepted").setValue(1);
                 cancellation.child("active").setValue(1);
                 Intent intent = new Intent(AcceptRejectActivity.this, QuestionActivity.class);
+                challengeDetails.setOpponentFbId(challengeDetails.getFbId());
                 challengeDetails.setFbId(fbId);
                 intent.putExtra("challengeDetails", challengeDetails);
                 startActivity(intent);

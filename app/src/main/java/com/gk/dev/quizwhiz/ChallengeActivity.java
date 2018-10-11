@@ -232,6 +232,7 @@ public class ChallengeActivity extends AppCompatActivity implements ChallengeAda
         } else {
             Intent intent = new Intent(ChallengeActivity.this, WaitForResponseActivity.class);
             ChallengeDetails challengeDetails = new ChallengeDetails(profile.getName(), profile.getProfilePictureUri(1000, 1000).toString(), fbId, selectedTopic.getTopic());
+
             ArrayList<Integer> numbers = new ArrayList<>(), subNumbers;
             for (int i = 0; i < selectedTopic.getnQuestions(); i++) {
                 numbers.add(i);

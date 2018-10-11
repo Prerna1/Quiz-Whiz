@@ -76,6 +76,7 @@ public class WaitForResponseActivity extends AppCompatActivity {
                     challengeDetails1.setPicture(selectedFriend.getPictureURL());
                     challengeDetails1.setTopic(selectedTopic.getTopic());
                     challengeDetails1.setNumbers(challengeDetails.getNumbers());
+                    challengeDetails1.setOpponentFbId(challengeDetails1.getFbId());
                     intent.putExtra("challengeDetails", challengeDetails1);
                     startActivity(intent);
                     finish();
