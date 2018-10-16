@@ -357,21 +357,21 @@ public class QuestionActivity extends AppCompatActivity {
                             choice4.setEnabled(false);
                             databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
                                 @Override
-                                public Transaction.Result doTransaction(MutableData mutableData) {
-                                    if (mutableData.getValue() == null) {
-                                        mutableData.setValue(1);
-                                    } else {
-                                        int count = mutableData.getValue(Integer.class);
-                                        mutableData.setValue(count + 1);
-                                    }
-                                    return Transaction.success(mutableData);
+                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                if (mutableData.getValue() == null) {
+                                    mutableData.setValue(1);
+                                } else {
+                                    int count = mutableData.getValue(Integer.class);
+                                    mutableData.setValue(count + 1);
                                 }
+                                return Transaction.success(mutableData);
+                            }
 
-                                @Override
-                                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
-                                    // Analyse databaseError for any error during increment
-                                }
-                            });
+                            @Override
+                            public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                                // Analyse databaseError for any error during increment
+                            }
+                        });
                             if (c2.equalsIgnoreCase(ca)) {
                                 choice2.setBackgroundColor(getResources().getColor(R.color.green));
                                 databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {

@@ -45,6 +45,7 @@ public class DashboardActivity extends AppCompatActivity {
         matchesDraw = findViewById(R.id.matches_draw);
         matchesLost = findViewById(R.id.matches_lost);
         Button challengeButton = findViewById(R.id.challenge_button);
+        Button leaderboardButton = findViewById(R.id.leaderboard);
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
@@ -90,7 +91,12 @@ public class DashboardActivity extends AppCompatActivity {
                     }
                 }
         );
-
+        leaderboardButton.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(DashboardActivity.this , LeaderboardActivity.class));
+            }
+        }));
     }
 
     @Override
@@ -154,7 +160,6 @@ public class DashboardActivity extends AppCompatActivity {
         };
         challenges.addValueEventListener(challengeListener);
     }
-
     @Override
     protected void onStop() {
         super.onStop();

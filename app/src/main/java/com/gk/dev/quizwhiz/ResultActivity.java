@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.Profile;
 import com.gk.dev.quizwhiz.Model.ChallengeDetails;
@@ -13,6 +15,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
@@ -53,10 +57,114 @@ public class ResultActivity extends AppCompatActivity {
         user1.setText(profile.getName());
         if (Integer.parseInt(user1Score) > Integer.parseInt(user2Score)) {
             matchStatus.setText("YOU WON");
+            Toast.makeText(this, "you won", Toast.LENGTH_SHORT).show();
+            databaseReference.child("UserDetails").child(fbId).child("won").runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        mutableData.setValue(1);
+                    } else {
+                        int count = mutableData.getValue(Integer.class);
+                        Log.d("prerna",Integer.toString(count));
+                        mutableData.setValue(count + 1);
+                    }
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                    // Analyse databaseError for any error during increment
+                }
+            });
+            databaseReference.child("UserDetails").child(challengeDetails.getOpponentFbId()).child("lost").runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        mutableData.setValue(1);
+                    } else {
+                        int count = mutableData.getValue(Integer.class);
+                        mutableData.setValue(count + 1);
+                    }
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                    // Analyse databaseError for any error during increment
+                }
+            });
         } else if (Integer.parseInt(user1Score) < Integer.parseInt(user2Score)) {
             matchStatus.setText("YOU LOSE");
+            databaseReference.child("UserDetails").child(fbId).child("lost").runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        mutableData.setValue(1);
+                    } else {
+                        int count = mutableData.getValue(Integer.class);
+                        mutableData.setValue(count + 1);
+                    }
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                    // Analyse databaseError for any error during increment
+                }
+            });
+            databaseReference.child("UserDetails").child(challengeDetails.getOpponentFbId()).child("won").runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        mutableData.setValue(1);
+                    } else {
+                        int count = mutableData.getValue(Integer.class);
+                        mutableData.setValue(count + 1);
+                    }
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                    // Analyse databaseError for any error during increment
+                }
+            });
         } else {
             matchStatus.setText("TIE");
+            databaseReference.child("UserDetails").child(fbId).child("draw").runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        mutableData.setValue(1);
+                    } else {
+                        int count = mutableData.getValue(Integer.class);
+                        mutableData.setValue(count + 1);
+                    }
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                    // Analyse databaseError for any error during increment
+                }
+            });
+            databaseReference.child("UserDetails").child(challengeDetails.getOpponentFbId()).child("draw").runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        mutableData.setValue(1);
+                    } else {
+                        int count = mutableData.getValue(Integer.class);
+                        mutableData.setValue(count + 1);
+                    }
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                    // Analyse databaseError for any error during increment
+                }
+            });
         }
 
     }
