@@ -150,12 +150,14 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
     protected void onPause() {
         super.onPause();
         userStatus.setValue(0);
+        challenges.removeEventListener(challengeListener);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         userStatus.setValue(1);
+        challenges.addValueEventListener(challengeListener);
     }
 
     @Override
@@ -180,13 +182,11 @@ public class SelectTopicActivity extends AppCompatActivity implements TopicAdapt
 
             }
         };
-        challenges.addValueEventListener(challengeListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        challenges.removeEventListener(challengeListener);
     }
 
     @Override

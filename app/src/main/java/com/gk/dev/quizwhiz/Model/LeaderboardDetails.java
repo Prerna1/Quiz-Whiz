@@ -1,6 +1,8 @@
 package com.gk.dev.quizwhiz.Model;
 
-public class LeaderboardDetails {
+import java.io.Serializable;
+
+public class LeaderboardDetails implements Serializable{
     private String name;
     private int rank,numberOfWins;
 

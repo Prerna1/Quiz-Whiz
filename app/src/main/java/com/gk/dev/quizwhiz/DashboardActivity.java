@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.gk.dev.quizwhiz.Model.ChallengeDetails;
+import com.gk.dev.quizwhiz.Model.LeaderboardDetails;
 import com.gk.dev.quizwhiz.Model.UserDetails;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -31,6 +32,8 @@ public class DashboardActivity extends AppCompatActivity {
     ChallengeDetails challengerInformation;
     FirebaseAuth mAuth;
     String fbId;
+    LeaderboardDetails leaderboardDetails;
+    boolean enabled;
     DatabaseReference challenges, userStatus;
     int won, lost, draw;
 
@@ -40,6 +43,7 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
         mAuth = FirebaseAuth.getInstance();
 
+        enabled = false;
         userName = findViewById(R.id.user_name);
         matchesWon = findViewById(R.id.matches_won);
         matchesDraw = findViewById(R.id.matches_draw);
@@ -56,8 +60,10 @@ public class DashboardActivity extends AppCompatActivity {
         userStatus.onDisconnect().setValue(0);
         userStatus.setValue(1);
 
+        leaderboardDetails = new LeaderboardDetails();
         Picasso.with(getApplicationContext()).load(profile.getProfilePictureUri(200, 200)).into((ImageView) findViewById(R.id.profilepic));
         userName.setText(profile.getFirstName());
+        leaderboardDetails.setName(profile.getFirstName());
         DatabaseReference stats = databaseReference.child("UserDetails/" + fbId);
         stats.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -67,7 +73,9 @@ public class DashboardActivity extends AppCompatActivity {
                 won = userDetails.won;
                 lost = userDetails.lost;
                 draw = userDetails.draw;
-
+                leaderboardDetails.setNumberOfWins(won);
+                leaderboardDetails.setRank(0);
+                enabled = true;
                 String wonText = "Won: " + Integer.toString(won);
                 String drawText = "Draw: " + Integer.toString(draw);
                 String lostText = "Lost: " + Integer.toString(lost);
@@ -94,7 +102,10 @@ public class DashboardActivity extends AppCompatActivity {
         leaderboardButton.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(DashboardActivity.this , LeaderboardActivity.class));
+                Intent intent = new Intent(DashboardActivity.this, LeaderboardActivity.class);
+                intent.putExtra("self", leaderboardDetails);
+                if (enabled)
+                    startActivity(intent);
             }
         }));
     }
@@ -128,12 +139,14 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         userStatus.setValue(0);
+        challenges.removeEventListener(challengeListener);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         userStatus.setValue(1);
+        challenges.addValueEventListener(challengeListener);
     }
 
     @Override
@@ -158,11 +171,10 @@ public class DashboardActivity extends AppCompatActivity {
 
             }
         };
-        challenges.addValueEventListener(challengeListener);
     }
+
     @Override
     protected void onStop() {
         super.onStop();
-        challenges.removeEventListener(challengeListener);
     }
 }

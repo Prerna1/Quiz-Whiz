@@ -88,24 +88,24 @@ public class WaitForResponseActivity extends AppCompatActivity {
 
             }
         };
-        challengeReference.addValueEventListener(responseListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         userStatus.setValue(0);
+        challengeReference.removeEventListener(responseListener);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         userStatus.setValue(2);
+        challengeReference.addValueEventListener(responseListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        challengeReference.removeEventListener(responseListener);
     }
 }

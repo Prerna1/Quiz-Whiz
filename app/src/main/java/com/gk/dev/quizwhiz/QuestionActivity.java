@@ -36,6 +36,7 @@ public class QuestionActivity extends AppCompatActivity {
     TextView timer, questionText, user1scoreTextView, user2scoreTextView, user1, user2;
     Button choice1, choice2, choice3, choice4;
     Integer i, j, k;
+    boolean nextActivity;
     Question question;
     ArrayList<Question> questions;
     ArrayList<Integer> numbers;
@@ -44,8 +45,8 @@ public class QuestionActivity extends AppCompatActivity {
     DatabaseReference userStatus;
     private String fbId, c1, c2, c3, c4, ca, q, questionNumber;
     private ProgressBar progressBar;
-    private DatabaseReference friendStatus;
-    private ValueEventListener statusListener;
+    private DatabaseReference friendStatus, t1, t2, t3, t4, t5;
+    private ValueEventListener statusListener, temp1, temp2, temp3, temp4, temp5;
     private RelativeLayout layout;
 
     @Override
@@ -54,6 +55,7 @@ public class QuestionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_question);
 
         timer = findViewById(R.id.tv_timer);
+        nextActivity = false;
         final Profile profile = Profile.getCurrentProfile();
         fbId = profile.getId();
 
@@ -97,8 +99,7 @@ public class QuestionActivity extends AppCompatActivity {
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").setValue(0);
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("questionStatus").setValue(0);
         databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").setValue(0);
-
-        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").addValueEventListener(new ValueEventListener() {
+        temp2 = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int count = dataSnapshot.getValue(Integer.class);
@@ -107,7 +108,11 @@ public class QuestionActivity extends AppCompatActivity {
                     intent.putExtra("challengeDetails", challengeDetails);
                     intent.putExtra("user1Score", user1scoreTextView.getText().toString());
                     intent.putExtra("user2Score", user2scoreTextView.getText().toString());
-                    startActivity(intent);
+                    if (!nextActivity) {
+                        startActivity(intent);
+                        finish();
+                        nextActivity = true;
+                    }
 
                 } else {
                     if (count == 2) {
@@ -126,17 +131,22 @@ public class QuestionActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
-        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("questionStatus").addValueEventListener(new ValueEventListener() {
+        };
+        t2 = databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count");
+        t2.addValueEventListener(temp2);
+        temp3 = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int status = dataSnapshot.getValue(Integer.class);
-                    if (status == 1) {
-                        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getOpponentFbId()).child("questionStatus").addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (status == 1) {
+                    t5 =
+                            databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getOpponentFbId()).child("questionStatus");
+                    temp5 = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            try {
                                 int status1 = dataSnapshot.getValue(Integer.class);
-                                if(status1 == 1){
+                                if (status1 == 1) {
                                     progressBar.setVisibility(View.GONE);
                                     timer.setVisibility(View.VISIBLE);
                                     user1scoreTextView.setVisibility(View.VISIBLE);
@@ -146,22 +156,28 @@ public class QuestionActivity extends AppCompatActivity {
                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                     fireNextQuestion();
                                 }
+                            } catch (Exception ignored) {
 
                             }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
 
-                            }
-                        });
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    };
+                    t5.addValueEventListener(temp5);
                 }
+            }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+        t3 = databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("questionStatus");
+        t3.addValueEventListener(temp3);
         countDownTimer = new CountDownTimer(10000, 1000) {
 
             public void onTick(long millisUntilFinished) {
@@ -169,7 +185,6 @@ public class QuestionActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
-
                 timer.setText("10");
                 fireNextQuestion();
             }
@@ -178,7 +193,7 @@ public class QuestionActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getOpponentFbId()).child("score").addValueEventListener(new ValueEventListener() {
+        temp1 = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 user2.setText(challengeDetails.getName());
@@ -193,8 +208,10 @@ public class QuestionActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
-        databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").addValueEventListener(new ValueEventListener() {
+        };
+        t1 = databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getOpponentFbId()).child("score");
+        t1.addValueEventListener(temp1);
+        temp4 = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 user1.setText(profile.getName());
@@ -236,7 +253,9 @@ public class QuestionActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+        t4 = databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score");
+        t4.addValueEventListener(temp4);
 
     }
 
@@ -248,9 +267,11 @@ public class QuestionActivity extends AppCompatActivity {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 databaseReference.child("UserDetails").child(fbId).child("status").setValue(1);
-               startActivity(new Intent(QuestionActivity.this,DashboardActivity.class));
-                startActivity(new Intent(QuestionActivity.this, DashboardActivity.class));
-                finish();
+                if (!nextActivity) {
+                    startActivity(new Intent(QuestionActivity.this, DashboardActivity.class));
+                    nextActivity = true;
+                    finish();
+                }
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -262,6 +283,7 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     public void fireNextQuestion() {
+        t5.removeEventListener(temp5);
         if (i < 7) {
             Log.d("abc", Integer.toString(i));
             Log.d("abc", questions.get(i).getQuestionText());
@@ -290,49 +312,30 @@ public class QuestionActivity extends AppCompatActivity {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    choice1.setText(questions.get(i).getChoice1());
-                    choice2.setText(questions.get(i).getChoice2());
-                    choice3.setText(questions.get(i).getChoice3());
-                    choice4.setText(questions.get(i).getChoice4());
-                    choice1.setVisibility(View.VISIBLE);
-                    choice2.setVisibility(View.VISIBLE);
-                    choice3.setVisibility(View.VISIBLE);
-                    choice4.setVisibility(View.VISIBLE);
-                    choice1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            choice1.setEnabled(false);
-                            choice2.setEnabled(false);
-                            choice3.setEnabled(false);
-                            choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
-                                @Override
-                                public Transaction.Result doTransaction(MutableData mutableData) {
-                                    if (mutableData.getValue() == null) {
-                                        mutableData.setValue(1);
-                                    } else {
-                                        int count = mutableData.getValue(Integer.class);
-                                        mutableData.setValue(count + 1);
-                                    }
-                                    return Transaction.success(mutableData);
-                                }
-
-                                @Override
-                                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
-                                    // Analyse databaseError for any error during increment
-                                }
-                            });
-                            if (c1.equalsIgnoreCase(ca)) {
-                                choice1.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
-
+                    if (i < 7) {
+                        choice1.setText(questions.get(i).getChoice1());
+                        choice2.setText(questions.get(i).getChoice2());
+                        choice3.setText(questions.get(i).getChoice3());
+                        choice4.setText(questions.get(i).getChoice4());
+                        choice1.setVisibility(View.VISIBLE);
+                        choice2.setVisibility(View.VISIBLE);
+                        choice3.setVisibility(View.VISIBLE);
+                        choice4.setVisibility(View.VISIBLE);
+                        choice1.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                choice1.setEnabled(false);
+                                choice2.setEnabled(false);
+                                choice3.setEnabled(false);
+                                choice4.setEnabled(false);
+                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
                                         if (mutableData.getValue() == null) {
                                             mutableData.setValue(1);
                                         } else {
-                                            int score = mutableData.getValue(Integer.class);
-                                            mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            int count = mutableData.getValue(Integer.class);
+                                            mutableData.setValue(count + 1);
                                         }
                                         return Transaction.success(mutableData);
                                     }
@@ -342,47 +345,47 @@ public class QuestionActivity extends AppCompatActivity {
                                         // Analyse databaseError for any error during increment
                                     }
                                 });
+                                if (c1.equalsIgnoreCase(ca)) {
+                                    choice1.setBackgroundColor(getResources().getColor(R.color.green));
+                                    databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
 
-                            } else {
-                                choice1.setBackgroundColor(getResources().getColor(R.color.red));
-                            }
-                        }
-                    });
-                    choice2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            choice1.setEnabled(false);
-                            choice2.setEnabled(false);
-                            choice3.setEnabled(false);
-                            choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
-                                @Override
-                            public Transaction.Result doTransaction(MutableData mutableData) {
-                                if (mutableData.getValue() == null) {
-                                    mutableData.setValue(1);
+                                        @Override
+                                        public Transaction.Result doTransaction(MutableData mutableData) {
+                                            if (mutableData.getValue() == null) {
+                                                mutableData.setValue(1);
+                                            } else {
+                                                int score = mutableData.getValue(Integer.class);
+                                                mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            }
+                                            return Transaction.success(mutableData);
+                                        }
+
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                                            // Analyse databaseError for any error during increment
+                                        }
+                                    });
+
                                 } else {
-                                    int count = mutableData.getValue(Integer.class);
-                                    mutableData.setValue(count + 1);
+                                    choice1.setBackgroundColor(getResources().getColor(R.color.red));
                                 }
-                                return Transaction.success(mutableData);
-                            }
-
-                            @Override
-                            public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
-                                // Analyse databaseError for any error during increment
                             }
                         });
-                            if (c2.equalsIgnoreCase(ca)) {
-                                choice2.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
-
+                        choice2.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                choice1.setEnabled(false);
+                                choice2.setEnabled(false);
+                                choice3.setEnabled(false);
+                                choice4.setEnabled(false);
+                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
                                         if (mutableData.getValue() == null) {
                                             mutableData.setValue(1);
                                         } else {
-                                            int score = mutableData.getValue(Integer.class);
-                                            mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            int count = mutableData.getValue(Integer.class);
+                                            mutableData.setValue(count + 1);
                                         }
                                         return Transaction.success(mutableData);
                                     }
@@ -392,47 +395,47 @@ public class QuestionActivity extends AppCompatActivity {
                                         // Analyse databaseError for any error during increment
                                     }
                                 });
+                                if (c2.equalsIgnoreCase(ca)) {
+                                    choice2.setBackgroundColor(getResources().getColor(R.color.green));
+                                    databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
 
-                            } else {
-                                choice2.setBackgroundColor(getResources().getColor(R.color.red));
+                                        @Override
+                                        public Transaction.Result doTransaction(MutableData mutableData) {
+                                            if (mutableData.getValue() == null) {
+                                                mutableData.setValue(1);
+                                            } else {
+                                                int score = mutableData.getValue(Integer.class);
+                                                mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            }
+                                            return Transaction.success(mutableData);
+                                        }
+
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                                            // Analyse databaseError for any error during increment
+                                        }
+                                    });
+
+                                } else {
+                                    choice2.setBackgroundColor(getResources().getColor(R.color.red));
+                                }
                             }
-                        }
-                    });
-                    choice3.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            choice1.setEnabled(false);
-                            choice2.setEnabled(false);
-                            choice3.setEnabled(false);
-                            choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
-                                @Override
-                                public Transaction.Result doTransaction(MutableData mutableData) {
-                                    if (mutableData.getValue() == null) {
-                                        mutableData.setValue(1);
-                                    } else {
-                                        int count = mutableData.getValue(Integer.class);
-                                        mutableData.setValue(count + 1);
-                                    }
-                                    return Transaction.success(mutableData);
-                                }
-
-                                @Override
-                                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
-                                    // Analyse databaseError for any error during increment
-                                }
-                            });
-                            if (c3.equalsIgnoreCase(ca)) {
-                                choice3.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
-
+                        });
+                        choice3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                choice1.setEnabled(false);
+                                choice2.setEnabled(false);
+                                choice3.setEnabled(false);
+                                choice4.setEnabled(false);
+                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
                                         if (mutableData.getValue() == null) {
                                             mutableData.setValue(1);
                                         } else {
-                                            int score = mutableData.getValue(Integer.class);
-                                            mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            int count = mutableData.getValue(Integer.class);
+                                            mutableData.setValue(count + 1);
                                         }
                                         return Transaction.success(mutableData);
                                     }
@@ -442,47 +445,47 @@ public class QuestionActivity extends AppCompatActivity {
                                         // Analyse databaseError for any error during increment
                                     }
                                 });
+                                if (c3.equalsIgnoreCase(ca)) {
+                                    choice3.setBackgroundColor(getResources().getColor(R.color.green));
+                                    databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
 
-                            } else {
-                                choice3.setBackgroundColor(getResources().getColor(R.color.red));
+                                        @Override
+                                        public Transaction.Result doTransaction(MutableData mutableData) {
+                                            if (mutableData.getValue() == null) {
+                                                mutableData.setValue(1);
+                                            } else {
+                                                int score = mutableData.getValue(Integer.class);
+                                                mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            }
+                                            return Transaction.success(mutableData);
+                                        }
+
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                                            // Analyse databaseError for any error during increment
+                                        }
+                                    });
+
+                                } else {
+                                    choice3.setBackgroundColor(getResources().getColor(R.color.red));
+                                }
                             }
-                        }
-                    });
-                    choice4.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            choice1.setEnabled(false);
-                            choice2.setEnabled(false);
-                            choice3.setEnabled(false);
-                            choice4.setEnabled(false);
-                            databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
-                                @Override
-                                public Transaction.Result doTransaction(MutableData mutableData) {
-                                    if (mutableData.getValue() == null) {
-                                        mutableData.setValue(1);
-                                    } else {
-                                        int count = mutableData.getValue(Integer.class);
-                                        mutableData.setValue(count + 1);
-                                    }
-                                    return Transaction.success(mutableData);
-                                }
-
-                                @Override
-                                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
-                                    // Analyse databaseError for any error during increment
-                                }
-                            });
-                            if (c4.equalsIgnoreCase(ca)) {
-                                choice4.setBackgroundColor(getResources().getColor(R.color.green));
-                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
-
+                        });
+                        choice4.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                choice1.setEnabled(false);
+                                choice2.setEnabled(false);
+                                choice3.setEnabled(false);
+                                choice4.setEnabled(false);
+                                databaseReference.child("Challenges").child(challengeDetails.getFbId()).child("count").runTransaction(new Transaction.Handler() {
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
                                         if (mutableData.getValue() == null) {
                                             mutableData.setValue(1);
                                         } else {
-                                            int score = mutableData.getValue(Integer.class);
-                                            mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            int count = mutableData.getValue(Integer.class);
+                                            mutableData.setValue(count + 1);
                                         }
                                         return Transaction.success(mutableData);
                                     }
@@ -492,15 +495,36 @@ public class QuestionActivity extends AppCompatActivity {
                                         // Analyse databaseError for any error during increment
                                     }
                                 });
+                                if (c4.equalsIgnoreCase(ca)) {
+                                    choice4.setBackgroundColor(getResources().getColor(R.color.green));
+                                    databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(fbId).child("score").runTransaction(new Transaction.Handler() {
 
-                            } else {
-                                choice4.setBackgroundColor(getResources().getColor(R.color.red));
+                                        @Override
+                                        public Transaction.Result doTransaction(MutableData mutableData) {
+                                            if (mutableData.getValue() == null) {
+                                                mutableData.setValue(1);
+                                            } else {
+                                                int score = mutableData.getValue(Integer.class);
+                                                mutableData.setValue(score + Integer.parseInt(timer.getText().toString()));
+                                            }
+                                            return Transaction.success(mutableData);
+                                        }
+
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) {
+                                            // Analyse databaseError for any error during increment
+                                        }
+                                    });
+
+                                } else {
+                                    choice4.setBackgroundColor(getResources().getColor(R.color.red));
+                                }
                             }
-                        }
-                    });
-                    i++;
-                    countDownTimer.start();
+                        });
+                        i++;
+                        countDownTimer.start();
 
+                    }
                 }
             }, 3000);
 
@@ -509,20 +533,60 @@ public class QuestionActivity extends AppCompatActivity {
             intent.putExtra("challengeDetails", challengeDetails);
             intent.putExtra("user1Score", user1scoreTextView.getText().toString());
             intent.putExtra("user2Score", user2scoreTextView.getText().toString());
-            startActivity(intent);
-            finish();
+            if (!nextActivity) {
+                startActivity(intent);
+                nextActivity = true;
+                finish();
+            }
         }
     }
+
     @Override
     protected void onStart() {
         super.onStart();
-        friendStatus = FirebaseDatabase.getInstance().getReference().child("UserDetails").child(challengeDetails.getFbId()).child("status");
+        friendStatus = FirebaseDatabase.getInstance().getReference().child("UserDetails").child(challengeDetails.getOpponentFbId()).child("status");
         statusListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int status = dataSnapshot.getValue(Integer.class);
-                if (status!=2) {
-                    startActivity(new Intent(QuestionActivity.this,OpponentLeftActivity.class));
+                if (status != 2 && i != 7) {
+
+                    databaseReference.child("Challenges").child(challengeDetails.getFbId()).child(challengeDetails.getOpponentFbId()).child("questionStatus").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            try {
+                                int q = dataSnapshot.getValue(Integer.class);
+                                if (q == 0 || q == 1) {
+                                    FirebaseDatabase.getInstance().getReference().child("UserDetails").child(challengeDetails.getOpponentFbId()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            int temp = dataSnapshot.getValue(Integer.class);
+                                            if (temp != 2 && !nextActivity) {
+
+                                                startActivity(new Intent(QuestionActivity.this, OpponentLeftActivity.class));
+                                                nextActivity = true;
+                                                finish();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
+                            } catch (Exception ignored) {
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
                 }
 
             }
@@ -538,7 +602,6 @@ public class QuestionActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        friendStatus.removeEventListener(statusListener);
     }
 
 
@@ -546,6 +609,11 @@ public class QuestionActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         userStatus.setValue(0);
+        friendStatus.removeEventListener(statusListener);
+        t1.removeEventListener(temp1);
+        t2.removeEventListener(temp2);
+        t3.removeEventListener(temp3);
+        t4.removeEventListener(temp4);
     }
 
     @Override
